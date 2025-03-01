@@ -8,6 +8,10 @@ useSeoMeta({
   description: "Home",
 });
 
+definePageMeta({
+  middleware: ["auth"],
+});
+
 const items = 40;
 </script>
 

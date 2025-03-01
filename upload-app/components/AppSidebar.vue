@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Home, User, Upload, LogOut } from "lucide-vue-next";
+import { Home, User, Upload } from "lucide-vue-next";
 import {
   Sidebar,
   SidebarContent,
@@ -11,6 +11,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import UploadModal from "./modals/UploadModal.vue";
+import SignOutBtn from "./SignOutBtn.vue";
 
 // Menu items.
 const items = [
@@ -60,8 +61,7 @@ const items = [
     <SidebarFooter
       class="flex flex-row justify-end text-[#f6f6f6] bg-[#191414] h-[50px] items-center"
     >
-      <span>Sign Out</span>
-      <LogOut />
+      <SignOutBtn />
     </SidebarFooter>
   </Sidebar>
 </template>

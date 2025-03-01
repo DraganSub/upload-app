@@ -1,4 +1,4 @@
-<script>
+<script setup>
 import Button from "~/components/ui/button/Button.vue";
 import Card from "~/components/ui/card/Card.vue";
 import CardHeader from "~/components/ui/card/CardHeader.vue";
@@ -6,10 +6,31 @@ import CardTitle from "~/components/ui/card/CardTitle.vue";
 import CardDescription from "~/components/ui/card/CardDescription.vue";
 import CardContent from "~/components/ui/card/CardContent.vue";
 import Input from "~/components/ui/input/Input.vue";
+import { ref } from "vue";
 
 definePageMeta({
   layout: "custom",
+  middleware: ["public"],
 });
+
+const email = ref("");
+const password = ref("");
+
+const onSubmit = async () => {
+  try {
+    const supabase = useSupabaseClient();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.value,
+      password: password.value,
+    });
+
+    if (error) throw error;
+
+    navigateTo("/");
+  } catch (error) {
+    console.log(error);
+  }
+};
 </script>
 
 <template>
@@ -26,7 +47,7 @@ definePageMeta({
           <div class="grid gap-2">
             <label for="email" class="text-white">Email</label>
             <Input
-              id="email"
+              v-model="email"
               type="email"
               placeholder="m@example.com"
               required
@@ -36,10 +57,10 @@ definePageMeta({
             <div class="flex items-center">
               <label for="password" class="text-white">Password</label>
             </div>
-            <Input id="password" type="password" required />
+            <Input v-model="password" type="password" required />
           </div>
           <Button
-            type="submit"
+            @click.prevent="onSubmit"
             class="w-full text-white bg-[#0c431e] p-2 rounded-md"
           >
             Login
