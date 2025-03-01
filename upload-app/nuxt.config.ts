@@ -7,6 +7,15 @@ export default defineNuxtConfig({
     'shadcn-nuxt',
     '@nuxtjs/tailwindcss'
   ],
+  runtimeConfig: {
+    public: {
+      supabaseUrl: process.env.SUPABASE_URL,
+      supabaseAnonKey: process.env.SUPABASE_KEY
+    }
+  },
+  supabase: {
+    redirect: false,
+  },
   //@ts-ignore
   shadcn: {
     /**

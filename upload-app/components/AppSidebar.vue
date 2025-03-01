@@ -10,6 +10,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import UploadModal from "./modals/UploadModal.vue";
 
 // Menu items.
 const items = [
@@ -25,7 +26,6 @@ const items = [
   },
   {
     title: "Upload",
-    // add composable for modal and change in view
     icon: Upload,
   },
 ];
@@ -42,10 +42,14 @@ const items = [
           <SidebarMenu>
             <SidebarMenuItem v-for="item in items" :key="item.title">
               <SidebarMenuButton asChild>
-                <NuxtLink class="text-[#f6f6f6]" :to="item.url">
+                <NuxtLink v-if="item.url" class="text-[#f6f6f6]" :to="item.url">
                   <component :is="item.icon" />
                   <span class="text-[15px]">{{ item.title }}</span>
                 </NuxtLink>
+                <span v-else class="text-[15px] text-white"
+                  ><component :is="item.icon" /> <UploadModal />
+                  <!-- {{ item.title }} --></span
+                >
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
