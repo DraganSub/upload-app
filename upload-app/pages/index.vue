@@ -1,9 +1,19 @@
-<script setup>
-import { Button } from "../components/ui/button/types";
+<script setup lang="ts">
+import AppSidebar from "../components/AppSidebar.vue";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+
+useSeoMeta({
+  title: "Home",
+  description: "Home",
+});
 </script>
+
 <template>
-  <div class="">
-    Home
-    <Button class="p-4 bg-red-200" variant="secondary">Btn</Button>
-  </div>
+  <SidebarProvider>
+    <AppSidebar />
+    <main>
+      <SidebarTrigger />
+      <slot />
+    </main>
+  </SidebarProvider>
 </template>

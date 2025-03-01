@@ -1,5 +1,9 @@
+<script setup>
+import "./assets/css/main.css";
+</script>
+
 <template>
-  <div>
+  <div class="bg-main-gradient">
     <NuxtPage />
   </div>
 </template>

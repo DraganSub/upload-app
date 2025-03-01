@@ -12,6 +12,7 @@
   "dependencies": {
     "@nuxtjs/supabase": "^1.4.6",
     "@nuxtjs/tailwindcss": "^6.13.1",
+    "@vueuse/core": "^12.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-vue-next": "^0.477.0",
@@ -23,6 +24,7 @@
     "vue-router": "latest"
   },
   "devDependencies": {
-    "shadcn-nuxt": "^1.0.2"
+    "shadcn-nuxt": "^1.0.2",
+    "typescript": "^5.8.2"
   }
 }
