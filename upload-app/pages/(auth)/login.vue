@@ -10,10 +10,6 @@ import Input from "~/components/ui/input/Input.vue";
 definePageMeta({
   layout: "custom",
 });
-
-useSeoMeta({
-  title: "Login",
-});
 </script>
 
 <template>

@@ -6,13 +6,8 @@ import CardTitle from "~/components/ui/card/CardTitle.vue";
 import CardDescription from "~/components/ui/card/CardDescription.vue";
 import CardContent from "~/components/ui/card/CardContent.vue";
 import Input from "~/components/ui/input/Input.vue";
-
 definePageMeta({
   layout: "custom",
-});
-
-useSeoMeta({
-  title: "Register",
 });
 </script>
 

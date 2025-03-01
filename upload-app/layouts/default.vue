@@ -5,11 +5,13 @@ import SidebarTrigger from "~/components/ui/sidebar/SidebarTrigger.vue";
 </script>
 
 <template>
-  <SidebarProvider>
-    <AppSidebar />
-    <main>
-      <SidebarTrigger />
-      <slot />
-    </main>
-  </SidebarProvider>
+  <div>
+    <SidebarProvider>
+      <AppSidebar />
+      <main class="w-full">
+        <SidebarTrigger class="mb-10" />
+        <NuxtPage />
+      </main>
+    </SidebarProvider>
+  </div>
 </template>
