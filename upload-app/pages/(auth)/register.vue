@@ -24,6 +24,7 @@ const onSubmit = async () => {
 
   if (password.value !== repeatPassword.value) {
     // TODO: Add error handling on field
+    // TODO: Add phone number on register page
     isPasswordMatching.value = false;
     throw new Error("Passwords do not match");
   }
@@ -32,12 +33,21 @@ const onSubmit = async () => {
     password: password.value,
     options: {
       data: {
-        fullName: firstName + " " + lastName,
+        fullName: firstName.value + " " + lastName.value,
       },
     },
   });
   // TODO: optional if time, add email confirmation
   if (error) throw error;
+
+  // TODO: test this functionality on next sign up
+  const { data: dbData, error: dbError } = await supabase.from("users").insert({
+    id: data.user.id,
+    email: email.value,
+    full_name: firstName.value + " " + lastName.value,
+  });
+
+  if (dbError) throw error(dbError);
 
   navigateTo("/");
 };
