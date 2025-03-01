@@ -4,6 +4,8 @@ import "./assets/css/main.css";
 
 <template>
   <div class="bg-main-gradient">
-    <NuxtPage />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </div>
 </template>

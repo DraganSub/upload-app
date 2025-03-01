@@ -9,11 +9,12 @@ useSeoMeta({
 </script>
 
 <template>
-  <SidebarProvider>
+  HOme
+  <!--   <SidebarProvider>
     <AppSidebar />
     <main>
       <SidebarTrigger />
       <slot />
     </main>
-  </SidebarProvider>
+  </SidebarProvider> -->
 </template>
