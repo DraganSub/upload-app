@@ -105,3 +105,10 @@
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
+
+.bg-profile-custom {
+  background-image: url("../images/user-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}

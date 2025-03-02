@@ -13,6 +13,11 @@ definePageMeta({
   middleware: ["public"],
 });
 
+useSeoMeta({
+  name: "Login",
+  description: "Login to your profile",
+});
+
 const email = ref("");
 const password = ref("");
 

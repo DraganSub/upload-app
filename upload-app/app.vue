@@ -1,5 +1,6 @@
 <script setup>
 import "./assets/css/main.css";
+import Toaster from "@/components/ui/toast/Toaster.vue";
 </script>
 
 <template>
@@ -7,5 +8,6 @@ import "./assets/css/main.css";
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <Toaster />
   </div>
 </template>
