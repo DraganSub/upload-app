@@ -12,9 +12,7 @@ import MyPhoneInput from "~/components/ui/phone-input/SphoneInput.vue";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -26,9 +24,10 @@ definePageMeta({
 });
 
 useSeoMeta({
-  name: "Register",
+  title: "Register",
   description: "Register new user",
 });
+
 const email = ref("");
 const password = ref("");
 const repeatPassword = ref("");
@@ -42,14 +41,7 @@ const { toast } = useToast();
 
 const onSubmit = async () => {
   const supabase = useSupabaseClient();
-  console.log(
-    "phone",
-    phoneNumber.value,
-    "country",
-    country.value,
-    "address",
-    address.value
-  );
+
   const { data, error } = await supabase.auth.signUp({
     email: email.value,
     password: password.value,
@@ -60,7 +52,14 @@ const onSubmit = async () => {
     },
   });
 
-  if (error) throw error;
+  if (error) {
+    toast({
+      title: error.message,
+      duration: 3000,
+      variant: "destructive",
+    });
+    return;
+  }
 
   const { data: dbData, error: dbError } = await supabase.from("users").insert({
     id: data.user.id,
@@ -71,7 +70,13 @@ const onSubmit = async () => {
     address: address.value,
   });
 
-  if (dbError) throw error(dbError);
+  if (dbError) {
+    toast({
+      title: error.message,
+      duration: 3000,
+      variant: "destructive",
+    });
+  }
   toast({
     title: "Successfully created account!",
     duration: 3000,

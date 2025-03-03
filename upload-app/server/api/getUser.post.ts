@@ -1,14 +1,9 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_KEY!
-);
+import { serverSupabaseClient } from "#supabase/server";
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
   const userId = body.userId;
-
+  const supabase = await serverSupabaseClient(event)
   if (!userId) throw new Error('User ID is required');
 
   const { data: user, error } = await supabase.from("users").select("*").eq("id", userId)

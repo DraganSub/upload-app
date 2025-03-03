@@ -39,25 +39,32 @@ const fetchData = async () => {
 };
 
 const deleteImage = async (fileName: string, imageId: string) => {
-  console.log(fileName);
   try {
-    const { data, error } = await supabase.storage
-      .from("images")
-      .remove([`uploads/${userRef?.value?.id}/${fileName}`]);
+    const response = await fetch("/api/deleteImage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fileName: fileName,
+        imageId: imageId,
+        userId: userRef?.value?.id,
+      }),
+    });
 
-    if (error) throw error;
-    const { data: dbData, error: dbError } = await supabase
-      .from("uploads")
-      .delete()
-      .eq("id", imageId);
-    if (!dbError) {
+    const data = await response.json();
+    if (data.success) {
       toast({
         title: "Successfully deleted image!",
         duration: 3000,
         variant: "success",
       });
+      await fetchData();
+    } else {
+      toast({
+        title: "There was a problem deleting the image",
+        duration: 3000,
+        variant: "destructive",
+      });
     }
-    await fetchData();
   } catch (error) {
     console.log(error);
   }

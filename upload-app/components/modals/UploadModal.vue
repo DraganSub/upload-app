@@ -1,6 +1,6 @@
 <template>
   <Dialog @update:open="resetState">
-    <DialogTrigger>Upload</DialogTrigger>
+    <DialogTrigger class="hover:text-black">Upload</DialogTrigger>
     <DialogContent class="bg-[#2D2F39] border-none">
       <div>
         <DialogHeader>
@@ -8,7 +8,6 @@
           <DialogDescription> Select images for upload </DialogDescription>
         </DialogHeader>
 
-        <!-- Drop Zone -->
         <div
           class="border-2 border-dashed mt-6 border-gray-300 rounded-lg p-6 min-w-[400px] text-center cursor-pointer transition-all duration-300"
           :class="{ 'bg-gray-100 border-blue-500': isDragging }"
@@ -35,7 +34,6 @@
           @change="onFileChange"
         />
 
-        <!-- Image Previews -->
         <div class="mt-4 grid grid-cols-3 gap-4 max-h-64 overflow-y-auto">
           <div
             v-for="(file, index) in files"
@@ -129,8 +127,7 @@ const uploadFiles = async () => {
   await Promise.all(
     files.value.map(async (file, index) => {
       try {
-        // @ts-ignore TODO: remove this ignore
-        await upload(file.file, userRef.value.id, (progress) => {
+        await upload(file.file, userRef?.value!.id, (progress) => {
           files.value[index].progress = progress;
         });
       } catch (error) {

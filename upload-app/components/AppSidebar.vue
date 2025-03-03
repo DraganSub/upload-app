@@ -49,8 +49,7 @@ const items = [
                 </NuxtLink>
                 <span v-else class="text-[15px] text-white"
                   ><component :is="item.icon" /> <UploadModal />
-                  <!-- {{ item.title }} --></span
-                >
+                </span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

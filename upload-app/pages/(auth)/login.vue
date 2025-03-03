@@ -7,6 +7,7 @@ import CardDescription from "~/components/ui/card/CardDescription.vue";
 import CardContent from "~/components/ui/card/CardContent.vue";
 import Input from "~/components/ui/input/Input.vue";
 import { ref } from "vue";
+import { useToast } from "~/components/ui/toast";
 
 definePageMeta({
   layout: "custom",
@@ -14,12 +15,13 @@ definePageMeta({
 });
 
 useSeoMeta({
-  name: "Login",
+  title: "Login",
   description: "Login to your profile",
 });
 
 const email = ref("");
 const password = ref("");
+const { toast } = useToast();
 
 const onSubmit = async () => {
   try {
@@ -29,9 +31,15 @@ const onSubmit = async () => {
       password: password.value,
     });
 
-    if (error) throw error;
-
-    navigateTo("/");
+    if (error) {
+      toast({
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    } else {
+      navigateTo("/");
+    }
   } catch (error) {
     console.log(error);
   }
@@ -54,6 +62,7 @@ const onSubmit = async () => {
             <Input
               v-model="email"
               type="email"
+              class="text-white"
               placeholder="m@example.com"
               required
             />
@@ -62,7 +71,12 @@ const onSubmit = async () => {
             <div class="flex items-center">
               <label for="password" class="text-white">Password</label>
             </div>
-            <Input v-model="password" type="password" required />
+            <Input
+              v-model="password"
+              class="text-white"
+              type="password"
+              required
+            />
           </div>
           <Button
             @click.prevent="onSubmit"

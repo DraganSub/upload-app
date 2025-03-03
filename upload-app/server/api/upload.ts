@@ -1,14 +1,16 @@
 import { defineEventHandler, readMultipartFormData } from 'h3';
-import { createClient } from '@supabase/supabase-js';
+import { serverSupabaseClient } from "#supabase/server";
+import { Database } from '~/database.types';
 
-// Secure environment variables
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_KEY!
-);
+type Upload = {
+  file_name: string;
+  user_id: string;
+  file_url: string;
+};
 
 export default defineEventHandler(async (event) => {
   try {
+    const supabase = await serverSupabaseClient<Database>(event);
     // Read uploaded file from form-data
     const formData = await readMultipartFormData(event);
     if (!formData) throw new Error('No file uploaded');
@@ -40,7 +42,7 @@ export default defineEventHandler(async (event) => {
     // Store file metadata in DB
     const { error: dbError } = await supabase
       .from('uploads')
-      .insert([{ file_name: fileField.filename, user_id: userId, file_url: fileUrl }]);
+      .insert<Upload>([{ file_name: fileField.filename, user_id: userId, file_url: fileUrl }]);
 
     if (dbError) throw new Error(`Database Insert Error: ${dbError.message}`);
 
