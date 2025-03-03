@@ -11,7 +11,6 @@ type Upload = {
 export default defineEventHandler(async (event) => {
   try {
     const supabase = await serverSupabaseClient<Database>(event);
-    // Read uploaded file from form-data
     const formData = await readMultipartFormData(event);
     if (!formData) throw new Error('No file uploaded');
 
@@ -20,13 +19,11 @@ export default defineEventHandler(async (event) => {
 
     if (!userId) throw new Error('User ID is required');
 
-    // Find file field
     const fileField = formData.find((field) => field.name === 'file');
     if (!fileField || !fileField.filename || !fileField.data) {
       throw new Error('Invalid file upload');
     }
 
-    // Upload file to Supabase Storage
     const { data, error } = await supabase.storage
       .from('images')
       .upload(`uploads/${userId}/${fileField.filename}`, fileField.data, {
@@ -36,10 +33,8 @@ export default defineEventHandler(async (event) => {
 
     if (error) throw new Error(error.message);
 
-    // Generate public URL
     const fileUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/images/uploads/${userId}/${fileField.filename}`;
 
-    // Store file metadata in DB
     const { error: dbError } = await supabase
       .from('uploads')
       .insert<Upload>([{ file_name: fileField.filename, user_id: userId, file_url: fileUrl }]);

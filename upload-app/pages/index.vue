@@ -20,7 +20,6 @@ const isLoading = ref(false);
 const images = ref<Tables<"uploads">[]>([]);
 const user = useSupabaseUser();
 const userRef = toRef(user, "value");
-const supabase = useSupabaseClient();
 const { toast } = useToast();
 
 const fetchData = async () => {
