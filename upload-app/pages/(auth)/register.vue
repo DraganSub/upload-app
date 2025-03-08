@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import countries from "~/assets/constants/countries";
+import ErrorMessage from "~/components/ErrorMessage.vue";
+import { useValidation } from "~/composables/useValidation";
 
 definePageMeta({
   layout: "custom",
@@ -34,14 +36,38 @@ const repeatPassword = ref("");
 const firstName = ref("");
 const lastName = ref("");
 const phoneNumber = ref("");
-const isPasswordMatching = ref(true);
 const country = ref("");
 const address = ref("");
 const { toast } = useToast();
+const { errors, validate, isValid } = useValidation();
 
 const onSubmit = async () => {
   const supabase = useSupabaseClient();
 
+  const formData = {
+    email: email.value,
+    password: password.value,
+    repeatPassword: repeatPassword.value,
+    firstName: firstName.value,
+    lastName: lastName.value,
+    phoneNumber: phoneNumber.value,
+    country: country.value,
+    address: address.value,
+  };
+
+  // Validate the form data
+  validate(formData);
+
+  if (!isValid.value) {
+    toast({
+      title: "Please fix the errors before submitting.",
+      duration: 3000,
+      variant: "destructive",
+    });
+    return;
+  }
+
+  // Sign up the user
   const { data, error } = await supabase.auth.signUp({
     email: email.value,
     password: password.value,
@@ -52,6 +78,7 @@ const onSubmit = async () => {
     },
   });
 
+  // If there is an error in signing up the user, show the error message
   if (error) {
     toast({
       title: error.message,
@@ -61,6 +88,7 @@ const onSubmit = async () => {
     return;
   }
 
+  // Insert the user data to the database
   const { data: dbData, error: dbError } = await supabase.from("users").insert({
     id: data.user.id,
     email: email.value,
@@ -70,13 +98,20 @@ const onSubmit = async () => {
     address: address.value,
   });
 
+  // If there is an error in inserting to the database, show the error message and remove the user from the authentication
   if (dbError) {
+    // Remove user if there is an error in inserting to the database
+    await supabase.auth.api.deleteUser(data.user.id);
+
     toast({
       title: error.message,
       duration: 3000,
       variant: "destructive",
     });
+
+    return;
   }
+
   toast({
     title: "Successfully created account!",
     duration: 3000,
@@ -84,14 +119,6 @@ const onSubmit = async () => {
   });
 
   navigateTo("/");
-};
-
-const checkIsPasswordMatching = () => {
-  if (password.value !== repeatPassword.value) {
-    isPasswordMatching.value = false;
-  } else {
-    isPasswordMatching.value = true;
-  }
 };
 </script>
 
@@ -105,7 +132,7 @@ const checkIsPasswordMatching = () => {
       <CardContent>
         <div class="flex flex-col gap-4">
           <div class="flex justify-around">
-            <div class="grid gap-2">
+            <div class="grid gap-2 relative">
               <label for="email" class="text-white">First Name</label>
               <Input
                 class="text-white"
@@ -114,8 +141,9 @@ const checkIsPasswordMatching = () => {
                 placeholder="John"
                 required
               />
+              <ErrorMessage :error="errors.firstName" />
             </div>
-            <div class="grid gap-2">
+            <div class="grid gap-2 relative">
               <label for="email" class="text-white">Last Name</label>
               <Input
                 class="text-white"
@@ -124,10 +152,11 @@ const checkIsPasswordMatching = () => {
                 placeholder="Doe"
                 required
               />
+              <ErrorMessage :error="errors.lastName" />
             </div>
           </div>
           <div class="flex justify-around">
-            <div class="grid gap-2">
+            <div class="grid gap-2 relative">
               <label for="email" class="text-white">Email</label>
               <Input
                 class="text-white"
@@ -136,8 +165,9 @@ const checkIsPasswordMatching = () => {
                 placeholder="johnDoe@gmail.com"
                 required
               />
+              <ErrorMessage :error="errors.email" />
             </div>
-            <div class="grid gap-2">
+            <div class="grid gap-2 relative">
               <label for="address" class="text-white">Address</label>
               <Input
                 class="text-white"
@@ -146,6 +176,7 @@ const checkIsPasswordMatching = () => {
                 placeholder="Wall Street 12"
                 required
               />
+              <ErrorMessage :error="errors.address" />
             </div>
           </div>
           <div class="w-[415px] mx-auto flex flex-col gap-2">
@@ -167,6 +198,7 @@ const checkIsPasswordMatching = () => {
                 </SelectItem>
               </SelectContent>
             </Select>
+            <ErrorMessage :error="errors.country" />
           </div>
 
           <div class="flex flex-col pr-6 pl-6 gap-2">
@@ -174,6 +206,7 @@ const checkIsPasswordMatching = () => {
               <label for="phoneNumber" class="text-white">Phone Number</label>
             </div>
             <MyPhoneInput class="text-white" v-model="phoneNumber" />
+            <ErrorMessage :error="errors.phoneNumber" />
           </div>
           <div class="flex justify-around">
             <div class="grid gap-2">
@@ -186,6 +219,7 @@ const checkIsPasswordMatching = () => {
                 type="password"
                 required
               />
+              <ErrorMessage :error="errors.password" />
             </div>
 
             <div class="grid gap-2 relative">
@@ -199,14 +233,8 @@ const checkIsPasswordMatching = () => {
                 v-model="repeatPassword"
                 type="password"
                 required
-                @input="checkIsPasswordMatching"
               />
-              <p
-                v-if="!isPasswordMatching"
-                class="text-red-500 absolute -bottom-7 -left-5 w-[230px]"
-              >
-                Please enter the same password
-              </p>
+              <ErrorMessage :error="errors.repeatPassword" />
             </div>
           </div>
 

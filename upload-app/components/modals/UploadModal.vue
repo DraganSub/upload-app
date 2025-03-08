@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { upload } from "~/utils/upload";
 import { Upload } from "lucide-vue-next";
 import DialogFooter from "../ui/dialog/DialogFooter.vue";
 import Button from "../ui/button/Button.vue";
@@ -8,26 +7,22 @@ import Progress from "../ui/progress/Progress.vue";
 import { X } from "lucide-vue-next";
 import DialogHeader from "../ui/dialog/DialogHeader.vue";
 import DialogDescription from "../ui/dialog/DialogDescription.vue";
-import { eventBus } from "~/utils/eventBus";
-import { useToast } from "../ui/toast";
+import useFileUpload from "~/composables/useFileUpload";
+import { useModal } from "~/composables/useModal";
 
+const { isUploading, files, addFiles, removeFile, uploadFiles } =
+  useFileUpload();
 const isDragging = ref(false);
-const fileInput = ref<HTMLInputElement | null>(null);
-const files = ref<{ file: File; preview: string; progress: number }[]>([]);
-const isUploading = ref(false);
 const uploadComplete = ref(false);
-const user = useSupabaseUser();
-const userRef = toRef(user, "value");
+const fileInput = ref<HTMLInputElement | null>(null);
 const openFileManager = () => fileInput.value?.click();
-const { toast } = useToast();
+const { openModal } = useModal();
 
-const onFileChange = (event: Event) => {
-  const input = event.target as HTMLInputElement;
-  if (!input.files) return;
+const onFileDrop = (event: DragEvent) => {
+  isDragging.value = false;
+  if (!event.dataTransfer?.files) return;
 
-  for (const file of input.files) {
-    files.value.push({ file, preview: URL.createObjectURL(file), progress: 0 });
-  }
+  addFiles(event.dataTransfer.files);
 };
 
 const resetState = () => {
@@ -35,54 +30,26 @@ const resetState = () => {
   uploadComplete.value = false;
 };
 
-const onDrop = (event: DragEvent) => {
-  isDragging.value = false;
-  if (!event.dataTransfer?.files) return;
+const onFileChange = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (!input.files) return;
 
-  for (const file of event.dataTransfer.files) {
-    files.value.push({ file, preview: URL.createObjectURL(file), progress: 0 });
+  for (const file of input.files) {
+    files.value.push({
+      file,
+      preview: URL.createObjectURL(file),
+      progress: 0,
+      error: null,
+    });
   }
-};
-
-const removeFile = (index: number) => {
-  URL.revokeObjectURL(files.value[index].preview);
-  files.value.splice(index, 1);
-};
-
-const uploadFiles = async () => {
-  isUploading.value = true;
-  await Promise.all(
-    files.value.map(async (file, index) => {
-      try {
-        await upload(file.file, userRef?.value!.id, (progress) => {
-          files.value[index].progress = progress;
-        });
-      } catch (error) {
-        console.error("Upload failed:", error);
-      }
-    })
-  );
-
-  isUploading.value = false;
-  uploadComplete.value = true;
-  eventBus.triggerUploadComplete();
-  toast({
-    title: "Successfully added image!",
-    duration: 3000,
-    variant: "success",
-  });
-
-  setTimeout(() => {
-    files.value.forEach((file) => URL.revokeObjectURL(file.preview)); // Clean up object URLs
-    files.value = [];
-    uploadComplete.value = false;
-  }, 5000);
 };
 </script>
 
 <template>
-  <Dialog @update:open="resetState">
-    <DialogTrigger class="hover:text-black">Upload</DialogTrigger>
+  <Dialog @update:open="resetState" @open-change="openModal">
+    <DialogTrigger asChild class="hover:text-black">
+      <button @click="openModal">Upload</button>
+    </DialogTrigger>
     <DialogContent class="bg-[#2D2F39] border-none">
       <div>
         <DialogHeader>
@@ -95,7 +62,7 @@ const uploadFiles = async () => {
           :class="{ 'bg-gray-100 border-blue-500': isDragging }"
           @dragover.prevent="isDragging = true"
           @dragleave.prevent="isDragging = false"
-          @drop.prevent="onDrop"
+          @drop.prevent="onFileDrop"
           @click="openFileManager"
         >
           <Upload
@@ -135,6 +102,7 @@ const uploadFiles = async () => {
             <Progress
               :model-value="file.progress"
               class="w-full mt-3 bg-green-100 border-none"
+              :class="{ 'bg-red-500': file.error }"
             />
           </div>
         </div>

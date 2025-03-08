@@ -8,6 +8,7 @@ import CardContent from "~/components/ui/card/CardContent.vue";
 import Input from "~/components/ui/input/Input.vue";
 import { ref } from "vue";
 import { useToast } from "~/components/ui/toast";
+import ErrorMessage from "~/components/ErrorMessage.vue";
 
 definePageMeta({
   layout: "custom",
@@ -19,12 +20,24 @@ useSeoMeta({
   description: "Login to your profile",
 });
 
+const { validateLoginCredentials, isValid, errors } = useValidation();
+
 const email = ref("");
 const password = ref("");
 const { toast } = useToast();
 
 const onSubmit = async () => {
   try {
+    validateLoginCredentials({ email: email.value, password: password.value });
+
+    if (!isValid.value) {
+      toast({
+        title: "Please fix the errors before submitting.",
+        duration: 3000,
+        variant: "destructive",
+      });
+      return;
+    }
     const supabase = useSupabaseClient();
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email.value,
@@ -66,6 +79,7 @@ const onSubmit = async () => {
               placeholder="m@example.com"
               required
             />
+            <ErrorMessage :error="errors.email" />
           </div>
           <div class="grid gap-2">
             <div class="flex items-center">
@@ -77,6 +91,7 @@ const onSubmit = async () => {
               type="password"
               required
             />
+            <ErrorMessage :error="errors.password" />
           </div>
           <Button
             @click.prevent="onSubmit"

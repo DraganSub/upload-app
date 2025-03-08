@@ -5,6 +5,15 @@ interface UploadResponse {
 }
 
 export async function upload(file: File, userId: string, onUploadProgress?: (progress: number) => void): Promise<UploadResponse> {
+
+  if (!['image/jpeg', 'image/png'].includes(file.type)) {
+    throw new Error('Only .jpg and .png files are allowed.');
+  }
+
+  if (file.size > 4 * 1024 * 1024) {
+    throw new Error('File size exceeds 4 MB.');
+  }
+
   const formData = new FormData();
   formData.append('file', file);
   formData.append('userId', userId);

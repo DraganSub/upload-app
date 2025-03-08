@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import Card from "~/components/ui/card/Card.vue";
-import { fetchImages } from "@/utils/fetchImages";
 import Dialog from "~/components/ui/dialog/Dialog.vue";
 import DialogTrigger from "~/components/ui/dialog/DialogTrigger.vue";
 import { useToast } from "~/components/ui/toast";
-import { ref } from "vue";
+import { ref, inject } from "vue";
 import { type Tables } from "~/database.types";
+import { useFetchRequest } from "~/composables/useFetch";
 
 useSeoMeta({
   title: "Home",
@@ -22,62 +22,73 @@ const user = useSupabaseUser();
 const userRef = toRef(user, "value");
 const { toast } = useToast();
 
-const fetchData = async () => {
+// inject the isImageUploaded ref and updateIsUploaded function
+const isImageUploaded = inject<{
+  isImageUploaded: Ref<boolean>;
+  updateIsUploaded: (value: boolean) => void;
+}>("isImageUploaded");
+
+const { fetchData, data, error } = useFetchRequest();
+
+const fetchDataFromDb = async () => {
   isLoading.value = true;
-  try {
-    const data = await fetchImages(userRef?.value!.id);
-    if (data.success) {
-      images.value = data.images;
-    } else {
-      console.error("Error fetching images:", data.message);
-    }
-  } catch (error) {
-    console.error("Fetch failed:", error);
+
+  await fetchData("/api/fetchImages", "POST", {
+    userId: userRef?.value?.id,
+  });
+
+  if (data.value?.success) {
+    images.value = data.value.images;
   }
+
+  if (error.value) {
+    toast({
+      title: error.value as string,
+      duration: 3000,
+      variant: "destructive",
+    });
+  }
+
   isLoading.value = false;
 };
 
 const deleteImage = async (fileName: string, imageId: string) => {
-  try {
-    const response = await fetch("/api/deleteImage", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fileName: fileName,
-        imageId: imageId,
-        userId: userRef?.value?.id,
-      }),
-    });
+  await fetchData("/api/deleteImage", "POST", {
+    fileName: fileName,
+    imageId: imageId,
+    userId: userRef?.value?.id,
+  });
 
-    const data = await response.json();
-    if (data.success) {
-      toast({
-        title: "Successfully deleted image!",
-        duration: 3000,
-        variant: "success",
-      });
-      await fetchData();
-    } else {
-      toast({
-        title: "There was a problem deleting the image",
-        duration: 3000,
-        variant: "destructive",
-      });
-    }
-  } catch (error) {
-    console.log(error);
+  if (data.value?.success) {
+    toast({
+      title: "Successfully deleted image!",
+      duration: 3000,
+      variant: "success",
+    });
+    await fetchDataFromDb();
+  }
+
+  if (error.value) {
+    toast({
+      title: "There was a problem deleting the image",
+      duration: 3000,
+      variant: "destructive",
+    });
   }
 };
 
 onMounted(() => {
-  fetchData();
+  fetchDataFromDb();
 });
 
 watch(
-  () => eventBus.uploadCompleted,
-  (newValue) => {
+  () => isImageUploaded?.isImageUploaded.value,
+  async (newValue) => {
     if (newValue) {
-      fetchData();
+      await fetchDataFromDb();
+
+      // prepare for the next upload
+      isImageUploaded?.updateIsUploaded(false);
     }
   }
 );

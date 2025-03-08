@@ -16,26 +16,30 @@ const userData = ref<Tables<"users"> | null>(null);
 const user = useSupabaseUser();
 const refUser = toRef(user, "value");
 const { toast } = useToast();
+const { fetchData, data, error } = useFetchRequest();
 
-const fetchData = async () => {
-  const response = await fetch("/api/getUser", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId: refUser?.value?.id }),
-  });
+const fetchUser = async () => {
+  await fetchData(
+    "/api/getUser",
+    "POST",
+    {
+      userId: refUser?.value?.id,
+    },
+    { "Content-Type": "application/json" }
+  );
 
-  const data = await response.json();
-  if (!data.success) {
+  if (!data.value.success || error.value) {
     toast({
       title: "Unable to get user",
       variant: "destructive",
     });
   } else {
-    userData.value = data.user[0];
+    userData.value = data.value.user[0];
   }
 };
+
 onMounted(() => {
-  fetchData();
+  fetchUser();
 });
 </script>
 
