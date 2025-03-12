@@ -73,7 +73,11 @@ const onSubmit = async () => {
     password: password.value,
     options: {
       data: {
-        full_name: firstName.value + " " + lastName.value,
+        first_name: firstName.value,
+        last_name: lastName.value,
+        country: country.value,
+        phone_number: phoneNumber.value,
+        address: address.value,
       },
     },
   });
@@ -85,30 +89,6 @@ const onSubmit = async () => {
       duration: 3000,
       variant: "destructive",
     });
-    return;
-  }
-
-  // Insert the user data to the database
-  const { data: dbData, error: dbError } = await supabase.from("users").insert({
-    id: data.user.id,
-    email: email.value,
-    full_name: firstName.value + " " + lastName.value,
-    country: country.value,
-    phone_number: phoneNumber.value,
-    address: address.value,
-  });
-
-  // If there is an error in inserting to the database, show the error message and remove the user from the authentication
-  if (dbError) {
-    // Remove user if there is an error in inserting to the database
-    await supabase.auth.api.deleteUser(data.user.id);
-
-    toast({
-      title: error.message,
-      duration: 3000,
-      variant: "destructive",
-    });
-
     return;
   }
 
