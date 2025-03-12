@@ -35,6 +35,6 @@ export default defineEventHandler(async (event) => {
   const imagesWithSignedUrls = await updateImagesWithSignedUrls();
 
   return {
-    success: true, images: imagesWithSignedUrls || []
+    success: true, images: imagesWithSignedUrls || [], error: error || null
   };
 })

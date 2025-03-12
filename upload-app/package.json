@@ -22,6 +22,7 @@
     "reka-ui": "^2.0.2",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^11.1.0",
     "vue": "latest",
     "vue-router": "latest"
   },

@@ -16,25 +16,30 @@ const userData = ref<Tables<"users"> | null>(null);
 const user = useSupabaseUser();
 const refUser = toRef(user, "value");
 const { toast } = useToast();
-const { fetchData, data, error } = useFetchRequest();
 
 const fetchUser = async () => {
-  await fetchData(
-    "/api/getUser",
-    "POST",
-    {
-      userId: refUser?.value?.id,
-    },
-    { "Content-Type": "application/json" }
-  );
-
-  if (!data.value.success || error.value) {
-    toast({
-      title: "Unable to get user",
-      variant: "destructive",
+  try {
+    const data = await $fetch("/api/getUser", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: refUser?.value?.id,
+      }),
     });
-  } else {
-    userData.value = data.value.user[0];
+
+    if (!data.success) {
+      toast({
+        title: "Unable to get user",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    userData.value = data.user[0];
+  } catch (error) {
+    console.error(error);
   }
 };
 
@@ -52,7 +57,7 @@ onMounted(() => {
       <div class="flex items-center gap-2">
         <User class="text-white" />
         <h1 class="border p-1 rounded-sm w-full text-white">
-          {{ userData.full_name }}
+          {{ userData.first_name }} {{ userData.last_name }}
         </h1>
       </div>
     </div>

@@ -5,7 +5,6 @@ import DialogTrigger from "~/components/ui/dialog/DialogTrigger.vue";
 import { useToast } from "~/components/ui/toast";
 import { ref, inject } from "vue";
 import { type Tables } from "~/database.types";
-import { useFetchRequest } from "~/composables/useFetch";
 
 useSeoMeta({
   title: "Home",
@@ -28,47 +27,61 @@ const isImageUploaded = inject<{
   updateIsUploaded: (value: boolean) => void;
 }>("isImageUploaded");
 
-const { fetchData, data, error } = useFetchRequest();
-
 const fetchDataFromDb = async () => {
   isLoading.value = true;
 
-  await fetchData("/api/fetchImages", "POST", {
-    userId: userRef?.value?.id,
-  });
-
-  if (data.value?.success) {
-    images.value = data.value.images;
-  }
-
-  if (error.value) {
-    toast({
-      title: error.value as string,
-      duration: 3000,
-      variant: "destructive",
+  try {
+    const data = await $fetch("/api/fetchImages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: userRef?.value?.id,
+      }),
     });
+
+    if (data.success) {
+      images.value = data.images;
+    }
+
+    if (data.error) {
+      toast({
+        title: data.error as string,
+        duration: 3000,
+        variant: "destructive",
+      });
+    }
+  } catch (error) {
+    console.error(error);
   }
 
   isLoading.value = false;
 };
 
 const deleteImage = async (fileName: string, imageId: string) => {
-  await fetchData("/api/deleteImage", "POST", {
-    fileName: fileName,
-    imageId: imageId,
-    userId: userRef?.value?.id,
-  });
-
-  if (data.value?.success) {
-    toast({
-      title: "Successfully deleted image!",
-      duration: 3000,
-      variant: "success",
+  try {
+    const data = await $fetch("/api/deleteImage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fileName: fileName,
+        imageId: imageId,
+        userId: userRef?.value?.id,
+      }),
     });
-    await fetchDataFromDb();
-  }
 
-  if (error.value) {
+    if (data.success) {
+      toast({
+        title: "Successfully deleted image!",
+        duration: 3000,
+        variant: "success",
+      });
+      await fetchDataFromDb();
+    }
+  } catch (error) {
     toast({
       title: "There was a problem deleting the image",
       duration: 3000,

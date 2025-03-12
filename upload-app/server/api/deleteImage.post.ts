@@ -7,16 +7,6 @@ export default defineEventHandler(async (event) => {
 
   const supabase = await serverSupabaseClient(event)
 
-
-  const { data: dbData, error: dbError } = await supabase
-    .from("uploads")
-    .delete()
-    .eq("id", imageId);
-
-  if (dbError) {
-    throw new Error("Error while deleting image from storage")
-  }
-
   const { data, error } = await supabase.storage
     .from("images")
     .remove([`uploads/${userId}/${fileName}`]);
@@ -25,6 +15,15 @@ export default defineEventHandler(async (event) => {
     throw new Error("Error while deleting image from storage");
   } else {
     responseData = { success: true }
+  }
+
+  const { data: dbData, error: dbError } = await supabase
+    .from("uploads")
+    .delete()
+    .eq("id", imageId);
+
+  if (dbError) {
+    throw new Error("Error while deleting image from database")
   }
 
   return responseData;
