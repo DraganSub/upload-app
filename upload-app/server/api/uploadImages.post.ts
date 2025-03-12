@@ -19,6 +19,9 @@ export default defineEventHandler(async (event) => {
 
     if (!userId) throw new Error('User ID is required');
 
+    const filedIdField = formData.find((field) => field.name === 'file_id');
+    const uniqueFileId = filedIdField?.data.toString();
+
     const fileField = formData.find((field) => field.name === 'file');
     if (!fileField || !fileField.filename || !fileField.data || !fileField.type) {
       throw new Error('Invalid file upload');
@@ -34,7 +37,7 @@ export default defineEventHandler(async (event) => {
 
     const { data, error } = await supabase.storage
       .from('images')
-      .upload(`uploads/${userId}/${fileField.filename}`, fileField.data, {
+      .upload(`uploads/${userId}/${uniqueFileId}`, fileField.data, {
         contentType: fileField.type,
         cacheControl: '3600',
         upsert: false,
@@ -42,7 +45,7 @@ export default defineEventHandler(async (event) => {
 
     if (error) throw new Error(error.message);
 
-    const fileUrl = `uploads/${userId}/${fileField.filename}`;
+    const fileUrl = `uploads/${userId}/${uniqueFileId}`;
 
     const { error: dbError } = await supabase
       .from('uploads')
