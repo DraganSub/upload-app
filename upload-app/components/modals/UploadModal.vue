@@ -7,23 +7,23 @@ import Progress from "../ui/progress/Progress.vue";
 import { X } from "lucide-vue-next";
 import DialogHeader from "../ui/dialog/DialogHeader.vue";
 import DialogDescription from "../ui/dialog/DialogDescription.vue";
-import useFileUpload from "~/composables/useFileUpload";
+import { useGlobalDragUpload } from "~/composables/useGlobalDragUpload";
 import { useModal } from "~/composables/useModal";
 
-const { isUploading, files, addFiles, removeFile, uploadFiles } =
-  useFileUpload();
-const isDragging = ref(false);
+const {
+  isUploading,
+  files,
+  removeFile,
+  uploadFiles,
+  onDragOver,
+  isDragging,
+  addFiles,
+} = useGlobalDragUpload();
+
 const uploadComplete = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 const openFileManager = () => fileInput.value?.click();
 const { openModal } = useModal();
-
-const onFileDrop = (event: DragEvent) => {
-  isDragging.value = false;
-  if (!event.dataTransfer?.files) return;
-
-  addFiles(event.dataTransfer.files);
-};
 
 const resetState = () => {
   files.value = [];
@@ -33,15 +33,7 @@ const resetState = () => {
 const onFileChange = (event: Event) => {
   const input = event.target as HTMLInputElement;
   if (!input.files) return;
-
-  for (const file of input.files) {
-    files.value.push({
-      file,
-      preview: URL.createObjectURL(file),
-      progress: 0,
-      error: null,
-    });
-  }
+  addFiles(input.files);
 };
 </script>
 
@@ -62,7 +54,7 @@ const onFileChange = (event: Event) => {
           :class="{ 'bg-gray-100 border-blue-500': isDragging }"
           @dragover.prevent="isDragging = true"
           @dragleave.prevent="isDragging = false"
-          @drop.prevent="onFileDrop"
+          @drop.prevent="onDragOver"
           @click="openFileManager"
         >
           <Upload
