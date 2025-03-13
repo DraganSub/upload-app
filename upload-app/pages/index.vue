@@ -5,6 +5,7 @@ import DialogTrigger from "~/components/ui/dialog/DialogTrigger.vue";
 import { useToast } from "~/components/ui/toast";
 import { ref, inject } from "vue";
 import { type Tables } from "~/database.types";
+import getFileExtension from "~/utils/helpers/getFileExtension";
 
 useSeoMeta({
   title: "Home",
@@ -27,9 +28,25 @@ const isImageUploaded = inject<{
   updateIsUploaded: (value: boolean) => void;
 }>("isImageUploaded");
 
+const downloadImages = async () => {
+  try {
+    const data = await $fetch("/api/downloadImages", {
+      method: "POST",
+      body: JSON.stringify({
+        userId: userRef?.value?.id,
+      }),
+    });
+    if (data.success) {
+      console.log("Images downloaded successfully");
+    }
+  } catch (error) {
+    console.error("Failed to download images:", error);
+  }
+};
+
 const fetchDataFromDb = async () => {
   isLoading.value = true;
-
+  await downloadImages();
   try {
     const data = await $fetch("/api/fetchImages", {
       method: "POST",
@@ -59,7 +76,11 @@ const fetchDataFromDb = async () => {
   isLoading.value = false;
 };
 
-const deleteImage = async (fileName: string, imageId: string) => {
+const deleteImage = async (
+  fileName: string,
+  imageId: string,
+  file_type: string
+) => {
   try {
     const data = await $fetch("/api/deleteImage", {
       method: "POST",
@@ -70,6 +91,7 @@ const deleteImage = async (fileName: string, imageId: string) => {
         fileName: fileName,
         imageId: imageId,
         userId: userRef?.value?.id,
+        file_type: file_type,
       }),
     });
 
@@ -121,7 +143,9 @@ watch(
               <Card class="w-[200px] h-[150px] overflow-hidden">
                 <CardContent class="p-0 w-full h-full">
                   <img
-                    :src="image.file_url"
+                    :src="`/images/${image.file_id}${getFileExtension(
+                      image.file_type
+                    )}`"
                     class="w-full h-full object-cover"
                   />
                 </CardContent>
@@ -132,14 +156,25 @@ watch(
               class="w-[700px] h-[600px] overflow-hidden bg-[#2D2F39] border-none p-8"
             >
               <div class="flex flex-col relative">
+                <DialogDescription class="text-white text-[16px] py-4">{{
+                  image.file_name
+                }}</DialogDescription>
                 <img
-                  :src="image.file_url"
+                  :src="`/images/${image.file_id}${getFileExtension(
+                    image.file_type
+                  )}`"
                   class="w-full h-full object-cover mb-10 max-h-[500px]"
                 />
                 <Button
                   variant="destructive"
                   class="w-[30%] absolute -bottom-1 right-0"
-                  @click="deleteImage(image.file_name, image.id)"
+                  @click="
+                    deleteImage(
+                      image.file_id,
+                      image.id,
+                      getFileExtension(image.file_type)
+                    )
+                  "
                 >
                   Delete
                 </Button>

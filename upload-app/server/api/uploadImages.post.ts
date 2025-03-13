@@ -1,11 +1,13 @@
 import { defineEventHandler, readMultipartFormData } from 'h3';
 import { serverSupabaseClient } from "#supabase/server";
-import { Database } from '~/database.types';
+import { Database, type Tables } from '~/database.types';
 
 type Upload = {
   file_name: string;
   user_id: string;
   file_url: string;
+  file_id: string;
+  file_type: string;
 };
 
 export default defineEventHandler(async (event) => {
@@ -49,7 +51,7 @@ export default defineEventHandler(async (event) => {
 
     const { error: dbError } = await supabase
       .from('uploads')
-      .insert<Upload>([{ file_name: fileField.filename, user_id: userId, file_url: fileUrl }]);
+      .insert<Upload>([{ file_name: fileField.filename.split(".")[0], user_id: userId, file_url: fileUrl, file_id: uniqueFileId!, file_type: fileField.type }]);
 
     if (dbError) throw new Error(`Database Insert Error: ${dbError.message}`);
 
