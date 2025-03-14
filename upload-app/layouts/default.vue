@@ -4,6 +4,7 @@ import SidebarProvider from "~/components/ui/sidebar/SidebarProvider.vue";
 import SidebarTrigger from "~/components/ui/sidebar/SidebarTrigger.vue";
 import { ref, provide } from "vue";
 import GlobalDragOverlay from "~/components/GlobalDragOverlay.vue";
+import Loader from "~/components/Loader.vue";
 
 const isImageUploaded = ref(false);
 function updateIsUploaded(value) {
@@ -17,9 +18,9 @@ provide("isImageUploaded", { isImageUploaded, updateIsUploaded });
     <SidebarProvider>
       <AppSidebar />
       <main class="w-full">
+        <Loader />
         <SidebarTrigger class="mb-10" />
         <NuxtPage />
-
         <GlobalDragOverlay />
       </main>
     </SidebarProvider>

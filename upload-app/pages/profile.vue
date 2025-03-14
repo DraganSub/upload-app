@@ -16,8 +16,10 @@ const userData = ref<Tables<"users"> | null>(null);
 const user = useSupabaseUser();
 const refUser = toRef(user, "value");
 const { toast } = useToast();
+const { startLoading, finishLoading } = useLoading();
 
 const fetchUser = async () => {
+  startLoading();
   try {
     const data = await $fetch("/api/getUser", {
       method: "POST",
@@ -40,6 +42,8 @@ const fetchUser = async () => {
     userData.value = data.user[0];
   } catch (error) {
     console.error(error);
+  } finally {
+    finishLoading();
   }
 };
 

@@ -16,12 +16,11 @@ definePageMeta({
   middleware: ["auth"],
 });
 
-const isLoading = ref(false);
 const images = ref<Tables<"uploads">[]>([]);
 const user = useSupabaseUser();
 const userRef = toRef(user, "value");
 const { toast } = useToast();
-
+const { startLoading, finishLoading } = useLoading();
 // inject the isImageUploaded ref and updateIsUploaded function
 const isImageUploaded = inject<{
   isImageUploaded: Ref<boolean>;
@@ -45,9 +44,9 @@ const downloadImages = async () => {
 };
 
 const fetchDataFromDb = async () => {
-  isLoading.value = true;
-  await downloadImages();
   try {
+    startLoading();
+    await downloadImages();
     const data = await $fetch("/api/fetchImages", {
       method: "POST",
       headers: {
@@ -71,9 +70,9 @@ const fetchDataFromDb = async () => {
     }
   } catch (error) {
     console.error(error);
+  } finally {
+    finishLoading();
   }
-
-  isLoading.value = false;
 };
 
 const deleteImage = async (
@@ -81,6 +80,7 @@ const deleteImage = async (
   imageId: string,
   file_type: string
 ) => {
+  startLoading();
   try {
     const data = await $fetch("/api/deleteImage", {
       method: "POST",
@@ -109,6 +109,8 @@ const deleteImage = async (
       duration: 3000,
       variant: "destructive",
     });
+  } finally {
+    finishLoading();
   }
 };
 
