@@ -9,7 +9,6 @@ useSeoMeta({
 
 definePageMeta({
   middleware: ["auth"],
-  layout: "profile-page-layout",
 });
 
 const userData = ref<Tables<"users"> | null>(null);

@@ -6,6 +6,8 @@ import { useToast } from "~/components/ui/toast";
 import { ref, inject } from "vue";
 import { type Tables } from "~/database.types";
 import getFileExtension from "~/utils/helpers/getFileExtension";
+import { VisuallyHidden } from "reka-ui";
+import { validateImageFilename } from "~/utils/helpers/validateImageFilename";
 
 useSeoMeta({
   title: "Home",
@@ -19,8 +21,13 @@ definePageMeta({
 const images = ref<Tables<"uploads">[]>([]);
 const user = useSupabaseUser();
 const userRef = toRef(user, "value");
+const isDeleteing = ref(false);
 const { toast } = useToast();
 const { startLoading, finishLoading } = useLoading();
+const isModalOpen = ref(false);
+const openModal = () => {
+  isModalOpen.value = true;
+};
 // inject the isImageUploaded ref and updateIsUploaded function
 const isImageUploaded = inject<{
   isImageUploaded: Ref<boolean>;
@@ -81,6 +88,7 @@ const deleteImage = async (
   file_type: string
 ) => {
   startLoading();
+  isDeleteing.value = true;
   try {
     const data = await $fetch("/api/deleteImage", {
       method: "POST",
@@ -111,11 +119,14 @@ const deleteImage = async (
     });
   } finally {
     finishLoading();
+    isDeleteing.value = false;
+    isModalOpen.value = false;
   }
 };
 
 onMounted(() => {
   fetchDataFromDb();
+  console.log(validateImageFilename("valid_filename123.jpg"));
 });
 
 watch(
@@ -140,9 +151,16 @@ watch(
     >
       <div v-for="image in images" :key="image.file_name">
         <div class="min-h-[70px] min-w-[100px] w-full">
-          <Dialog class="bg-[#2D2F39] border-none">
-            <DialogTrigger>
-              <Card class="w-[200px] h-[150px] overflow-hidden">
+          <Dialog
+            update:open="resetState"
+            @open-change="openModal"
+            class="bg-[#2D2F39] border-none"
+          >
+            <DialogTrigger asChild>
+              <Card
+                @click="openModal"
+                class="w-[200px] h-[150px] overflow-hidden cursor-pointer"
+              >
                 <CardContent class="p-0 w-full h-full">
                   <img
                     :src="`/images/${image.file_id}${getFileExtension(
@@ -155,8 +173,11 @@ watch(
             </DialogTrigger>
 
             <DialogContent
-              class="w-[700px] h-[600px] overflow-hidden bg-[#2D2F39] border-none p-8"
+              class="w-[700px] h-[700px] overflow-hidden bg-[#2D2F39] border-none p-8"
             >
+              <VisuallyHidden>
+                <DialogTitle>Image preview modal</DialogTitle>
+              </VisuallyHidden>
               <div class="flex flex-col relative">
                 <DialogDescription class="text-white text-[16px] py-4">{{
                   image.file_name
@@ -169,6 +190,7 @@ watch(
                 />
                 <Button
                   variant="destructive"
+                  :disabled="isDeleteing"
                   class="w-[30%] absolute -bottom-1 right-0"
                   @click="
                     deleteImage(

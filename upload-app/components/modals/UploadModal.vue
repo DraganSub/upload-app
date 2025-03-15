@@ -9,6 +9,7 @@ import DialogHeader from "../ui/dialog/DialogHeader.vue";
 import DialogDescription from "../ui/dialog/DialogDescription.vue";
 import { useGlobalDragUpload } from "~/composables/useGlobalDragUpload";
 import { useModal } from "~/composables/useModal";
+import { VisuallyHidden } from "reka-ui";
 
 const {
   isUploading,
@@ -18,17 +19,12 @@ const {
   onDragOver,
   isDragging,
   addFiles,
+  resetState,
 } = useGlobalDragUpload();
 
-const uploadComplete = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 const openFileManager = () => fileInput.value?.click();
 const { openModal } = useModal();
-
-const resetState = () => {
-  files.value = [];
-  uploadComplete.value = false;
-};
 
 const onFileChange = (event: Event) => {
   const input = event.target as HTMLInputElement;
@@ -42,7 +38,10 @@ const onFileChange = (event: Event) => {
     <DialogTrigger asChild class="hover:text-black">
       <button @click="openModal">Upload</button>
     </DialogTrigger>
-    <DialogContent class="bg-[#2D2F39] border-none">
+    <DialogContent class="bg-[#161a23] border-none">
+      <VisuallyHidden>
+        <DialogTitle>Upload Images</DialogTitle>
+      </VisuallyHidden>
       <div>
         <DialogHeader>
           <h2 class="text-white">Upload Images</h2>
@@ -101,7 +100,7 @@ const onFileChange = (event: Event) => {
 
         <DialogFooter class="mt-3">
           <Button
-            :disabled="isUploading || uploadComplete || files.length === 0"
+            :disabled="isUploading || files.length === 0"
             @click="uploadFiles"
             class="bg-green-500 hover:bg-green-700 p-2 rounded text-white"
           >

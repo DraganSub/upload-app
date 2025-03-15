@@ -34,7 +34,7 @@ const items = [
 
 <template>
   <Sidebar>
-    <SidebarContent class="bg-[#191414]">
+    <SidebarContent class="bg-[#161a23]">
       <SidebarGroup>
         <SidebarGroupLabel class="text-[#f6f6f6] font-thin mb-3"
           >Application</SidebarGroupLabel
@@ -58,7 +58,7 @@ const items = [
     </SidebarContent>
     <Separator />
     <SidebarFooter
-      class="flex flex-row justify-end text-[#f6f6f6] bg-[#191414] h-[50px] items-center"
+      class="flex flex-row justify-end bg-[#161a23] text-[#f6f6f6] h-[50px] items-center"
     >
       <SignOutBtn />
     </SidebarFooter>

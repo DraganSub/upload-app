@@ -1,5 +1,6 @@
 import axios from "axios";
 import { v4 as uuidv4 } from 'uuid';
+import { validateImageFilename } from "./helpers/validateImageFilename";
 
 interface UploadResponse {
   fileUrl: string;
@@ -7,6 +8,12 @@ interface UploadResponse {
 
 export async function upload(file: File, userId: string, onUploadProgress?: (progress: number) => void): Promise<UploadResponse> {
   const uniqueFileId = uuidv4();
+  console.log("file", file)
+  const validatedFilename = validateImageFilename(file.name)
+  if (!validatedFilename.isValid) {
+    throw new Error('Filename can only contain letters, numbers, and hyphens (-). Avoid special characters like * : \\ / < > | ? [ ] ; = + & £ $ , .')
+  }
+
   if (!['image/jpeg', 'image/png'].includes(file.type)) {
     throw new Error('Only .jpg and .png files are allowed.');
   }

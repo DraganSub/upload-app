@@ -36,7 +36,6 @@ export default defineEventHandler(async (event) => {
 
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath); // Delete the file
-      console.log(`Deleted local file: ${filePath}`);
     } else {
       console.warn("File not found in local folder:", filePath);
     }

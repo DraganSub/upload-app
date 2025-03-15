@@ -28,6 +28,9 @@ export default defineEventHandler(async (event) => {
     if (!fileField || !fileField.filename || !fileField.data || !fileField.type) {
       throw new Error('Invalid file upload');
     }
+    console.log("fileField", fileField.type)
+
+
 
     if (!['image/jpeg', 'image/png'].includes(fileField.type)) {
       throw new Error('Only .jpg and .png files are allowed.');

@@ -10,7 +10,6 @@ export default defineEventHandler(async (event) => {
     if (!userId) throw new Error('User ID is required');
     const supabase = await serverSupabaseClient(event);
     const { data: files, error } = await supabase.storage.from(`images`).list(`uploads/${userId}`);
-    console.log(files)
     if (error) throw error;
 
     const downloadFolder = path.resolve('public/images');
@@ -24,10 +23,8 @@ export default defineEventHandler(async (event) => {
       const filePath = path.join(downloadFolder, `${file.name}${getFileExtension(file.metadata.mimetype)}`);
 
       // Skip download if file already exists
-      if (fs.existsSync(filePath)) {
-        console.log(`Skipping existing file: ${file.name}`);
-        continue;
-      }
+      if (fs.existsSync(filePath)) continue;
+
 
 
       const { data, error: downloadError } = await supabase.storage
@@ -42,7 +39,6 @@ export default defineEventHandler(async (event) => {
       const buffer = Buffer.from(await data.arrayBuffer());
 
       fs.writeFileSync(filePath, buffer);
-      console.log(`Saved: ${file.name}`);
     }
 
     return { success: true, message: 'Images downloaded successfully' };
