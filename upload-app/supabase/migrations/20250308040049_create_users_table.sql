@@ -1,13 +1,17 @@
 CREATE TABLE public.users (
-    id uuid NOT NULL DEFAULT gen_random_uuid(),
-    email text NOT NULL,
-    full_name text NULL,
-    created_at timestamp without time zone NULL DEFAULT now(),
-    phone_number text NULL,
-    address text NULL,
-    country text NULL,
-    CONSTRAINT users_pkey PRIMARY KEY (id),
-    CONSTRAINT users_email_key UNIQUE (email)
+  id uuid not null,
+  email text not null,
+  created_at timestamp without time zone null default now(),
+  phone_number text null,
+  address text null,
+  country text null,
+  first_name text null,
+  last_name text null,
+  constraint users_pkey primary key (id),
+  constraint users_email_key unique (email),
+  constraint users_id_fkey foreign KEY (id) references auth.users (id) on delete CASCADE,
+  constraint users_first_name_check check ((length(first_name) <= 50)),
+  constraint users_last_name_check check ((length(last_name) <= 50))
 );
 
 -- Enable (RLS)
